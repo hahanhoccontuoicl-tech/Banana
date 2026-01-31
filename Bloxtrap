@@ -1,0 +1,12 @@
+{
+  "DFIntTaskSchedulerTargetFps": 144,
+  "FFlagDebugGraphicsDisableDirect3D11": false,
+  "FFlagDisablePostFx": true,
+  "FFlagDebugDisableShadows": true,
+  "FFlagDebugGraphicsPreferVulkan": true,
+  "FFlagGraphicsDisableTextureStreaming": false,
+  "DFIntGraphicsQualityLevel": 1,
+  "FFlagFixGraphicsQuality": true,
+  "FFlagRenderFixSunRays": true,
+  "FFlagDisableParticles": true
+}
