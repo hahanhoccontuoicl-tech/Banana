@@ -1,0 +1,96 @@
+ReplicatedStorage
+ └── Remotes
+     ├── FarmRequest (RemoteEvent)
+     ├── RandomFruit (RemoteEvent)
+     └── UnlockGodHuman (RemoteEvent)
+
+ServerScriptService
+ ├── PlayerData.server.lua
+ ├── FarmSystem.server.lua
+ ├── FruitSystem.server.lua
+ └── GodHuman.server.lua
+
+StarterPlayer
+ └── StarterPlayerScripts
+     └── KaitunClient.client.lua
+local Players = game:GetService("Players")
+
+local DEFAULT_DATA = {
+	Level = 1,
+	Exp = 0,
+}
+
+local Data = {}
+
+Players.PlayerAdded:Connect(function(player)
+	Data[player] = table.clone(DEFAULT_DATA)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	Data[player] = nil
+end)
+
+return Data
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FarmEvent = ReplicatedStorage.Remotes.FarmRequest
+local PlayerData = require(script.Parent.PlayerData)
+
+local EXP_PER_KILL = 50
+
+FarmEvent.OnServerEvent:Connect(function(player)
+	local data = PlayerData[player]
+	if not data then return end
+
+	data.Exp += EXP_PER_KILL
+
+	if data.Exp >= data.Level * 100 then
+		data.Exp = 0
+		data.Level += 1
+	end
+end)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FruitEvent = ReplicatedStorage.Remotes.RandomFruit
+
+local Fruits = {
+	"Flame",
+	"Ice",
+	"Light",
+	"Magma",
+	"Dough",
+}
+
+FruitEvent.OnServerEvent:Connect(function(player)
+	local randomFruit = Fruits[math.random(#Fruits)]
+	player:SetAttribute("DevilFruit", randomFruit)
+end)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UnlockEvent = ReplicatedStorage.Remotes.UnlockGodHuman
+local PlayerData = require(script.Parent.PlayerData)
+
+UnlockEvent.OnServerEvent:Connect(function(player)
+	local data = PlayerData[player]
+	if not data then return end
+
+	if data.Level >= 2800 then
+		player:SetAttribute("GodHuman", true)
+	end
+end)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local FarmEvent = ReplicatedStorage.Remotes.FarmRequest
+local FruitEvent = ReplicatedStorage.Remotes.RandomFruit
+local GodHumanEvent = ReplicatedStorage.Remotes.UnlockGodHuman
+
+-- Auto farm loop
+task.spawn(function()
+	while true do
+		FarmEvent:FireServer()
+		task.wait(1)
+	end
+end)
+
+-- Random fruit
+FruitEvent:FireServer()
+
+-- Try unlock God Human
+GodHumanEvent:FireServer()
