@@ -1,0 +1,170 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "BananaHub"
+gui.Parent = player:WaitForChild("PlayerGui")
+gui.ResetOnSpawn = false
+
+-- MAIN
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 430, 0, 310)
+main.Position = UDim2.new(0.5, -215, 0.5, -155)
+main.BackgroundColor3 = Color3.fromRGB(255, 200, 40)
+main.BorderSizePixel = 0
+main.ZIndex = 2
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 22)
+
+-- SHADOW
+local shadow = Instance.new("ImageLabel", main)
+shadow.Size = UDim2.new(1, 30, 1, 30)
+shadow.Position = UDim2.new(0, -15, 0, -15)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageTransparency = 0.45
+shadow.ZIndex = 1
+
+-- TITLE
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Text = "Banana Hub"
+title.Font = Enum.Font.GothamBlack
+title.TextSize = 28
+title.TextColor3 = Color3.fromRGB(80, 50, 15)
+title.ZIndex = 3
+
+-- TABS
+local tabNames = {"Main", "Farm", "Get All"}
+local tabButtons = {}
+local pages = {}
+
+for i, name in ipairs(tabNames) do
+	local btn = Instance.new("TextButton", main)
+	btn.Size = UDim2.new(0, 120, 0, 36)
+	btn.Position = UDim2.new(0, 20 + (i-1)*135, 0, 60)
+	btn.Text = name
+	btn.Font = Enum.Font.GothamSemibold
+	btn.TextSize = 16
+	btn.TextColor3 = Color3.fromRGB(60,40,10)
+	btn.BackgroundColor3 = Color3.fromRGB(255, 230, 120)
+	btn.ZIndex = 3
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 14)
+	tabButtons[name] = btn
+
+	local page = Instance.new("Frame", main)
+	page.Size = UDim2.new(1, -40, 1, -120)
+	page.Position = UDim2.new(0, 20, 0, 105)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	page.ZIndex = 3
+	pages[name] = page
+end
+
+-- ACTIVE TAB EFFECT
+local function setActive(tab)
+	for name, btn in pairs(tabButtons) do
+		local targetColor = (name == tab)
+			and Color3.fromRGB(255, 175, 50)
+			or Color3.fromRGB(255, 230, 120)
+
+		TweenService:Create(
+			btn,
+			TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+			{BackgroundColor3 = targetColor}
+		):Play()
+
+		pages[name].Visible = (name == tab)
+	end
+end
+
+for name, btn in pairs(tabButtons) do
+	btn.MouseButton1Click:Connect(function()
+		setActive(name)
+	end)
+end
+
+setActive("Main")
+
+-- MAIN PAGE
+local mainText = Instance.new("TextLabel", pages.Main)
+mainText.Size = UDim2.new(1, 0, 1, 0)
+mainText.BackgroundTransparency = 1
+mainText.TextWrapped = true
+mainText.Text = "BANANA HUB\n\n✔ Banana Style UI\n✔ Smooth Animation\n✔ Main / Farm / Get All\n\nMade for your game"
+mainText.Font = Enum.Font.GothamBold
+mainText.TextSize = 18
+mainText.TextColor3 = Color3.fromRGB(70,45,15)
+
+-- FARM PAGE
+local farmBtn = Instance.new("TextButton", pages.Farm)
+farmBtn.Size = UDim2.new(0, 260, 0, 52)
+farmBtn.Position = UDim2.new(0.5, -130, 0, 30)
+farmBtn.Text = "Auto Farm : OFF"
+farmBtn.Font = Enum.Font.GothamBold
+farmBtn.TextSize = 18
+farmBtn.TextColor3 = Color3.fromRGB(60,40,10)
+farmBtn.BackgroundColor3 = Color3.fromRGB(255, 235, 140)
+Instance.new("UICorner", farmBtn).CornerRadius = UDim.new(0, 16)
+
+local autofarm = false
+farmBtn.MouseButton1Click:Connect(function()
+	autofarm = not autofarm
+	farmBtn.Text = autofarm and "Auto Farm : ON" or "Auto Farm : OFF"
+
+	TweenService:Create(
+		farmBtn,
+		TweenInfo.new(0.2),
+		{BackgroundColor3 = autofarm and Color3.fromRGB(170,255,130) or Color3.fromRGB(255,235,140)}
+	):Play()
+end)
+
+-- GET ALL PAGE
+local getAllBtn = Instance.new("TextButton", pages["Get All"])
+getAllBtn.Size = UDim2.new(0, 260, 0, 52)
+getAllBtn.Position = UDim2.new(0.5, -130, 0, 30)
+getAllBtn.Text = "GET ALL"
+getAllBtn.Font = Enum.Font.GothamBold
+getAllBtn.TextSize = 18
+getAllBtn.TextColor3 = Color3.fromRGB(40,80,30)
+getAllBtn.BackgroundColor3 = Color3.fromRGB(170, 255, 140)
+Instance.new("UICorner", getAllBtn).CornerRadius = UDim.new(0, 16)
+
+-- DRAG UI
+local dragging, dragStart, startPos
+main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		main.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + delta.X,
+			startPos.Y.Scale, startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- AUTO FARM LOOP (placeholder – thay logic game của bạn)
+task.spawn(function()
+	while true do
+		if autofarm then
+			print("Banana Auto Farming...")
+		end
+		task.wait(1)
+	end
+end)
